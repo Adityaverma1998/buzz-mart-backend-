@@ -15,5 +15,6 @@ const userController = new UserController(userService);
 router.post("/register", (req, res, next) => userController.register(req, res, next));
 router.post("/login", (req, res, next) => userController.login(req, res, next));
 router.post("/oauth-login", (req, res, next) => userController.oauthLogin(req, res, next));
+router.post("/firebase-login", (req, res, next) => userController.firebaseLogin(req, res, next));
 
 export default router;

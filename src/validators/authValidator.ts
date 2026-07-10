@@ -25,3 +25,10 @@ export const oauthLoginSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type OAuthLoginInput = z.infer<typeof oauthLoginSchema>;
+
+export const firebaseLoginSchema = z.object({
+    idToken: z.string().min(1, "Firebase ID Token is required")
+});
+
+export type FirebaseLoginInput = z.infer<typeof firebaseLoginSchema>;
+

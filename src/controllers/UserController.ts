@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { UserService } from "../services/UserService.ts";
-import { registerSchema, loginSchema, oauthLoginSchema } from "../validators/authValidator.ts";
+import { registerSchema, loginSchema, oauthLoginSchema, firebaseLoginSchema } from "../validators/authValidator.ts";
 
 export class UserController {
     private userService: UserService;
@@ -65,6 +65,24 @@ export class UserController {
 
             res.status(200).json({
                 message: "OAuth login successful",
+                data: {
+                    user: sanitizedUser,
+                    token
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async firebaseLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const validatedData = firebaseLoginSchema.parse(req.body);
+            const { user, token } = await this.userService.firebaseLogin(validatedData);
+            const { password, ...sanitizedUser } = user;
+
+            res.status(200).json({
+                message: "Firebase login successful",
                 data: {
                     user: sanitizedUser,
                     token

@@ -4,13 +4,13 @@
    "description": "",
    "main": "index.js",
    "scripts": {
-      "dev": "cross-env NODE_ENV=dev nodemon src/server.ts",
+      "dev": "cross-env NODE_ENV=dev nodemon --exec tsx src/server.ts",
       "test": "echo \"Error: no test specified\" && exit 1",
       "format:fix": "prettier . --write",
       "format:check": "prettier . --check",
       "lint": "eslint .",
       "lint:fix": "eslint . --fix",
-      "start": "ts-node src/index.ts",
+      "start": "tsx src/index.ts",
       "typeorm": "typeorm-ts-node-commonjs"
    },
    "repository": {
@@ -32,6 +32,7 @@
       "@types/http-errors": "^2.0.5",
       "@types/jsonwebtoken": "^9.0.10",
       "@types/node": "^26.1.0",
+      "cross-env": "^10.1.0",
       "eslint": "^10.6.0",
       "globals": "^17.7.0",
       "nodemon": "^3.1.14",
@@ -43,9 +44,9 @@
    },
    "dependencies": {
       "bcrypt": "^6.0.0",
-      "cross-env": "^10.1.0",
       "dotenv": "^17.4.2",
       "express": "^5.2.1",
+      "firebase-admin": "^14.1.0",
       "http-errors": "^2.0.1",
       "jsonwebtoken": "^9.0.3",
       "pg-query-stream": "^4.16.0",

@@ -18,7 +18,10 @@ const {
     DB_SYNCHRONIZE,
     DB_LOGGING,
     JWT_SECRET,
-    JWT_EXPIRES_IN
+    JWT_EXPIRES_IN,
+    FIREBASE_PROJECT_ID,
+    FIREBASE_CLIENT_EMAIL,
+    FIREBASE_PRIVATE_KEY
 } = process.env;
 
 export const Config = {
@@ -32,5 +35,8 @@ export const Config = {
     DB_SYNCHRONIZE: DB_SYNCHRONIZE === 'true' || true,
     DB_LOGGING: DB_LOGGING === 'true' || false,
     JWT_SECRET: JWT_SECRET || 'dev-secret-key-1234567890',
-    JWT_EXPIRES_IN: JWT_EXPIRES_IN || '1h'
+    JWT_EXPIRES_IN: JWT_EXPIRES_IN || '1h',
+    FIREBASE_PROJECT_ID,
+    FIREBASE_CLIENT_EMAIL,
+    FIREBASE_PRIVATE_KEY
 }
