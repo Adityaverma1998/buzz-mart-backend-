@@ -1,7 +1,7 @@
 import type { Response, NextFunction } from "express"
 import type { AuthRequest } from "../middlewares/authMiddleware.ts"
 import { CheckoutService } from "../services/CheckoutService.ts"
-import { checkoutPreviewSchema, placeOrderSchema } from "../validators/checkoutValidator.ts"
+import { checkoutPreviewSchema, placeOrderSchema, verifyRazorpayPaymentSchema } from "../validators/checkoutValidator.ts"
 
 export class CheckoutController {
     private checkoutService: CheckoutService
@@ -32,6 +32,7 @@ export class CheckoutController {
             const validated = placeOrderSchema.parse(req.body)
             const order = await this.checkoutService.placeOrder(userId, validated)
 
+            const payment = order.payments?.[0]
             res.status(201).json({
                 success: true,
                 message: "Order placed successfully",
@@ -41,6 +42,28 @@ export class CheckoutController {
                     totalAmount: order.totalAmount,
                     status: order.status,
                     paymentMethod: order.paymentMethod,
+                    isPaid: order.isPaid,
+                    razorpayOrderId: order.paymentMethod === "razorpay" ? payment?.transactionId : undefined
+                }
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async verifyPayment(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = req.auth.sub
+            const validated = verifyRazorpayPaymentSchema.parse(req.body)
+            const order = await this.checkoutService.verifyPayment(userId, validated)
+
+            res.status(200).json({
+                success: true,
+                message: "Payment verified and order confirmed successfully",
+                data: {
+                    id: order.id,
+                    orderNumber: order.orderNumber,
+                    status: order.status,
                     isPaid: order.isPaid
                 }
             })

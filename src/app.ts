@@ -31,12 +31,14 @@ import addressRouter from "./routes/addressRouter.ts";
 import checkoutRouter from "./routes/checkoutRouter.ts";
 import orderRouter from "./routes/orderRouter.ts";
 import adminOrderRouter from "./routes/adminOrderRouter.ts";
+import adminReportRouter from "./routes/adminReportRouter.ts";
 
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/addresses", addressRouter);
 app.use("/api/v1/checkout", checkoutRouter);
 app.use("/api/v1/orders", orderRouter);
 app.use("/api/v1/admin/orders", adminOrderRouter);
+app.use("/api/v1/admin/reports", adminReportRouter);
 
 // Global Error Handler Middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

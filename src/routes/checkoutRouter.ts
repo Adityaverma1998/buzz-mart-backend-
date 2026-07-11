@@ -59,5 +59,6 @@ router.use(authMiddleware)
 
 router.post("/preview", (req, res, next) => checkoutController.preview(req as any, res, next))
 router.post("/place", (req, res, next) => checkoutController.placeOrder(req as any, res, next))
+router.post("/verify-payment", (req, res, next) => checkoutController.verifyPayment(req as any, res, next))
 
 export default router

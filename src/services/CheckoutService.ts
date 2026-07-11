@@ -16,7 +16,7 @@ import { AuditService } from "./AuditService.ts"
 import { AuditAction } from "../entities/AuditLog.ts"
 import { generateOrderNumber } from "../utils/generateOrderNumber.ts"
 import { toMoney } from "../utils/money.ts"
-import type { CheckoutPreviewInput, PlaceOrderInput } from "../validators/checkoutValidator.ts"
+import type { CheckoutPreviewInput, PlaceOrderInput, VerifyRazorpayPaymentInput } from "../validators/checkoutValidator.ts"
 
 export interface CheckoutPreviewResult {
     subtotal: number
@@ -247,10 +247,10 @@ export class CheckoutService {
             // 9. Process Payment Initialization (e.g. COD or Gateway)
             if (input.paymentMethod === "cod") {
                 await this.paymentService.initializeCODPayment(savedOrder, manager)
-            } else {
-                // If other method, e.g. online, initialize it too
-                // Stub for gateway integration
-                // For now, let's also write payment row
+            } else if (input.paymentMethod === "razorpay") {
+                const payment = await this.paymentService.initializeRazorpayPayment(savedOrder, manager)
+                // Attach the payment to the savedOrder so controllers can read the Razorpay order ID
+                savedOrder.payments = [payment]
             }
 
             // 10. Convert Cart to Converted state
@@ -267,6 +267,66 @@ export class CheckoutService {
             })
 
             return savedOrder
+        })
+    }
+
+    /**
+     * Atomically verify a Razorpay payment and transition order to CONFIRMED.
+     */
+    async verifyPayment(userId: number, input: VerifyRazorpayPaymentInput): Promise<Order> {
+        return await this.dataSource.transaction(async (manager: EntityManager) => {
+            // 1. Verify payment signature
+            const payment = await this.paymentService.verifyRazorpaySignature(
+                input.razorpayOrderId,
+                input.razorpayPaymentId,
+                input.signature,
+                manager
+            )
+
+            // 2. Fetch the corresponding order
+            const order = await manager.findOne(Order, {
+                where: { id: payment.orderId, userId },
+                relations: { items: true }
+            })
+
+            if (!order) {
+                throw new createHttpError.NotFound("Order not found")
+            }
+
+            const oldStatus = order.status
+            const newStatus = OrderStatus.CONFIRMED
+
+            // If order is still pending, confirm it and deduct inventory stock
+            if (oldStatus === OrderStatus.PENDING) {
+                order.status = newStatus
+                await manager.save(Order, order)
+
+                // Confirm stock deduction (moves from reserved to sold)
+                for (const item of order.items) {
+                    if (item.productId) {
+                        await this.inventoryService.confirmStockDeduction(item.productId, item.quantity, manager)
+                    }
+                }
+
+                // Append status tracking history
+                const tracking = new OrderTracking()
+                tracking.orderId = order.id
+                tracking.status = newStatus
+                tracking.message = "Payment verified successfully. Order confirmed."
+                await manager.save(OrderTracking, tracking)
+
+                // Log the action
+                await this.auditService.log({
+                    userId,
+                    action: AuditAction.ORDER_STATUS_CHANGED,
+                    entityType: "Order",
+                    entityId: order.id,
+                    oldValues: { status: oldStatus },
+                    newValues: { status: newStatus }
+                })
+            }
+
+            return order
         })
     }
 }

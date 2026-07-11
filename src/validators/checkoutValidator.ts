@@ -17,7 +17,14 @@ export const placeOrderSchema = z.object({
     idempotencyKey: z.string().min(1).optional()
 })
 
+export const verifyRazorpayPaymentSchema = z.object({
+    razorpayOrderId: z.string().min(1, "Razorpay Order ID is required"),
+    razorpayPaymentId: z.string().min(1, "Razorpay Payment ID is required"),
+    signature: z.string().min(1, "Razorpay Signature is required")
+})
+
 // ───────────────── Inferred Types ─────────────────
 
 export type CheckoutPreviewInput = z.infer<typeof checkoutPreviewSchema>
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>
+export type VerifyRazorpayPaymentInput = z.infer<typeof verifyRazorpayPaymentSchema>

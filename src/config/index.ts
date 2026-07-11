@@ -42,5 +42,8 @@ export const Config = {
     FIREBASE_CLIENT_EMAIL,
     FIREBASE_PRIVATE_KEY,
     SMTP_EMAIL: SMTP_EMAIL || '',
-    SMTP_PASSWORD: SMTP_PASSWORD || ''
+    SMTP_PASSWORD: SMTP_PASSWORD || '',
+    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+    RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || 'secret_placeholder',
+    RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || 'webhook_secret_placeholder'
 }
