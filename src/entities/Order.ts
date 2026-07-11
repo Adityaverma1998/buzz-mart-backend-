@@ -17,16 +17,7 @@ import { OrderTracking } from "./OrderTracking.ts"
 import { Payment } from "./Payment.ts"
 import type { AddressSnapshot } from "./Address.ts"
 import { DecimalTransformer } from "../utils/DecimalTransformer.ts"
-
-export enum OrderStatus {
-    PENDING = "PENDING",
-    CONFIRMED = "CONFIRMED",
-    PROCESSING = "PROCESSING",
-    SHIPPED = "SHIPPED",
-    DELIVERED = "DELIVERED",
-    CANCELLED = "CANCELLED",
-    REFUNDED = "REFUNDED"
-}
+import { OrderStatus } from "./OrderStatus.ts"
 
 @Entity()
 @Check(`"subtotal" >= 0`)

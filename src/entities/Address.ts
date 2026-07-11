@@ -73,12 +73,12 @@ export type AddressSnapshot = {
     fullName: string
     phoneNumber: string
     street: string
-    apartment?: string
+    apartment?: string | null | undefined
     city: string
     state: string
     postalCode: string
     country: string
-    landmark?: string
+    landmark?: string | null | undefined
 }
 
 /**
@@ -89,11 +89,11 @@ export function toAddressSnapshot(address: Address): AddressSnapshot {
         fullName: address.fullName,
         phoneNumber: address.phoneNumber,
         street: address.street,
-        apartment: address.apartment,
+        apartment: address.apartment ?? null,
         city: address.city,
         state: address.state,
         postalCode: address.postalCode,
         country: address.country,
-        landmark: address.landmark
+        landmark: address.landmark ?? null
     }
 }

@@ -26,6 +26,18 @@ app.use("/api/v1/products", productRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/brands", brandRouter);
 
+import cartRouter from "./routes/cartRouter.ts";
+import addressRouter from "./routes/addressRouter.ts";
+import checkoutRouter from "./routes/checkoutRouter.ts";
+import orderRouter from "./routes/orderRouter.ts";
+import adminOrderRouter from "./routes/adminOrderRouter.ts";
+
+app.use("/api/v1/cart", cartRouter);
+app.use("/api/v1/addresses", addressRouter);
+app.use("/api/v1/checkout", checkoutRouter);
+app.use("/api/v1/orders", orderRouter);
+app.use("/api/v1/admin/orders", adminOrderRouter);
+
 // Global Error Handler Middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     // Handle Zod validation errors

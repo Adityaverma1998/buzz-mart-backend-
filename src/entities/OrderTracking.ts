@@ -7,7 +7,8 @@ import {
     JoinColumn,
     Index
 } from "typeorm"
-import { Order, OrderStatus } from "./Order.ts"
+import { Order } from "./Order.ts"
+import { OrderStatus } from "./OrderStatus.ts"
 
 @Entity()
 @Index(["orderId", "createdAt"])

@@ -23,13 +23,13 @@ export class AuditService {
     }): Promise<void> {
         try {
             const entry = new AuditLog()
-            entry.userId = params.userId
+            if (params.userId !== undefined) entry.userId = params.userId
             entry.action = params.action
             entry.entityType = params.entityType
             entry.entityId = params.entityId
-            entry.oldValues = params.oldValues
-            entry.newValues = params.newValues
-            entry.ipAddress = params.ipAddress
+            if (params.oldValues !== undefined) entry.oldValues = params.oldValues
+            if (params.newValues !== undefined) entry.newValues = params.newValues
+            if (params.ipAddress !== undefined) entry.ipAddress = params.ipAddress
 
             await this.auditRepository.save(entry)
         } catch (error) {

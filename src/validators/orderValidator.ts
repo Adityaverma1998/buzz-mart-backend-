@@ -1,17 +1,18 @@
 import { z } from "zod"
+import { OrderStatus } from "../entities/OrderStatus.ts"
 
 // ───────────────── Order Query Validators ─────────────────
 
 export const customerOrderQuerySchema = z.object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(50).default(10),
-    status: z.enum(["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"]).optional()
+    status: z.nativeEnum(OrderStatus).optional()
 })
 
 export const adminOrderQuerySchema = z.object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(20),
-    status: z.enum(["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"]).optional(),
+    status: z.nativeEnum(OrderStatus).optional(),
     search: z.string().optional(),
     paymentStatus: z.enum(["paid", "unpaid"]).optional(),
     dateFrom: z.coerce.date().optional(),
@@ -22,8 +23,16 @@ export const adminOrderQuerySchema = z.object({
 
 // ───────────────── Order Status Update Validators ─────────────────
 
+// Filter out PENDING for manual status transitions
 export const updateOrderStatusSchema = z.object({
-    status: z.enum(["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"]),
+    status: z.enum([
+        OrderStatus.CONFIRMED,
+        OrderStatus.PROCESSING,
+        OrderStatus.SHIPPED,
+        OrderStatus.DELIVERED,
+        OrderStatus.CANCELLED,
+        OrderStatus.REFUNDED
+    ]),
     message: z.string().max(500).optional(),
     location: z.string().max(200).optional()
 })
