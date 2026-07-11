@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // ───────────────── Product Validators ─────────────────
 
-export const createProductSchema = z.object({
+const baseProductSchema = z.object({
     name: z.string().min(1, "Product name is required"),
     slug: z.string().min(1, "Slug is required"),
     shortDescription: z.string().optional(),
@@ -27,12 +27,17 @@ export const createProductSchema = z.object({
     featured: z.boolean().default(false),
     isActive: z.boolean().default(true),
     thumbnail: z.string().optional()
-}).refine(
+});
+
+export const createProductSchema = baseProductSchema.refine(
     (data) => !data.salePrice || data.salePrice <= data.price,
     { message: "Sale price must be less than or equal to price", path: ["salePrice"] }
 );
 
-export const updateProductSchema = createProductSchema.partial();
+export const updateProductSchema = baseProductSchema.partial().refine(
+    (data) => !data.salePrice || (data.price !== undefined ? data.salePrice <= data.price : true),
+    { message: "Sale price must be less than or equal to price", path: ["salePrice"] }
+);
 
 export const updateProductStatusSchema = z.object({
     status: z.enum(["ACTIVE", "INACTIVE", "OUT_OF_STOCK", "DRAFT"])

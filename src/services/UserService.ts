@@ -7,14 +7,17 @@ import { Config } from "../config/index.ts";
 import createHttpError from "http-errors";
 import type { RegisterInput, LoginInput, OAuthLoginInput, FirebaseLoginInput } from "../validators/authValidator.ts";
 import { getAuth } from "firebase-admin/auth";
+import type { EmailService } from "./EmailService.ts";
 
 export class UserService {
     private userRepository: Repository<User>;
     private deviceRepository: Repository<UserDevice>;
+    private emailService: EmailService;
 
-    constructor(userRepository: Repository<User>, deviceRepository: Repository<UserDevice>) {
+    constructor(userRepository: Repository<User>, deviceRepository: Repository<UserDevice>, emailService: EmailService) {
         this.userRepository = userRepository;
         this.deviceRepository = deviceRepository;
+        this.emailService = emailService;
     }
 
     async register(input: RegisterInput): Promise<User> {
@@ -44,6 +47,10 @@ export class UserService {
 
         const savedUser = await this.userRepository.save(user);
         await this.saveDeviceToken(savedUser, input.fcmToken);
+
+        // Send welcome email (fire-and-forget, don't block registration)
+        this.emailService.sendWelcomeEmail(savedUser.email, savedUser.firstName);
+
         return savedUser;
     }
 
