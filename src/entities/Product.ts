@@ -7,13 +7,15 @@ import {
     DeleteDateColumn,
     ManyToOne,
     OneToMany,
-    Index
+    Check
 } from "typeorm"
 import { Category } from "./Category.ts"
 import { Brand } from "./Brand.ts"
 import { User } from "./User.ts"
 import { ProductImage } from "./ProductImage.ts"
 import { ProductVariant } from "./ProductVariant.ts"
+import { DecimalTransformer } from "../utils/DecimalTransformer.ts"
+import { toMoney } from "../utils/money.ts"
 
 export enum ProductStatus {
     ACTIVE = "ACTIVE",
@@ -23,6 +25,10 @@ export enum ProductStatus {
 }
 
 @Entity()
+@Check(`"stock" >= 0`)
+@Check(`"reserved" >= 0`)
+@Check(`"stock" >= "reserved"`)
+@Check(`"price" >= 0`)
 export class Product {
     @PrimaryGeneratedColumn("uuid")
     id!: string
@@ -30,7 +36,6 @@ export class Product {
     @Column({ type: "varchar" })
     name!: string
 
-    @Index({ unique: true })
     @Column({ type: "varchar", unique: true })
     slug!: string
 
@@ -40,7 +45,6 @@ export class Product {
     @Column({ type: "text", nullable: true })
     description?: string
 
-    @Index({ unique: true })
     @Column({ type: "varchar", unique: true })
     sku!: string
 
@@ -67,13 +71,13 @@ export class Product {
     brandId?: string
 
     // Pricing
-    @Column({ type: "decimal", precision: 10, scale: 2, default: 0 })
+    @Column({ type: "decimal", precision: 10, scale: 2, default: 0, transformer: DecimalTransformer })
     price!: number
 
-    @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
+    @Column({ type: "decimal", precision: 10, scale: 2, nullable: true, transformer: DecimalTransformer })
     salePrice?: number
 
-    @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
+    @Column({ type: "decimal", precision: 10, scale: 2, nullable: true, transformer: DecimalTransformer })
     costPrice?: number
 
     // Inventory
@@ -81,26 +85,29 @@ export class Product {
     stock!: number
 
     @Column({ type: "int", default: 0 })
+    reserved!: number
+
+    @Column({ type: "int", default: 0 })
     minStock!: number
 
     // Physical attributes
-    @Column({ type: "decimal", precision: 8, scale: 2, nullable: true })
+    @Column({ type: "decimal", precision: 8, scale: 2, nullable: true, transformer: DecimalTransformer })
     weight?: number
 
-    @Column({ type: "decimal", precision: 8, scale: 2, nullable: true })
+    @Column({ type: "decimal", precision: 8, scale: 2, nullable: true, transformer: DecimalTransformer })
     length?: number
 
-    @Column({ type: "decimal", precision: 8, scale: 2, nullable: true })
+    @Column({ type: "decimal", precision: 8, scale: 2, nullable: true, transformer: DecimalTransformer })
     width?: number
 
-    @Column({ type: "decimal", precision: 8, scale: 2, nullable: true })
+    @Column({ type: "decimal", precision: 8, scale: 2, nullable: true, transformer: DecimalTransformer })
     height?: number
 
     @Column({ type: "varchar", nullable: true })
     unit?: string
 
     // Tax
-    @Column({ type: "decimal", precision: 5, scale: 2, default: 0 })
+    @Column({ type: "decimal", precision: 5, scale: 2, default: 0, transformer: DecimalTransformer })
     taxPercentage!: number
 
     // Status & visibility
@@ -138,4 +145,43 @@ export class Product {
 
     @DeleteDateColumn()
     deletedAt?: Date
+
+    // ───────────────── Helper Methods ─────────────────
+
+    /**
+     * Returns the available stock (total minus reserved).
+     */
+    getAvailableStock(): number {
+        return this.stock - this.reserved
+    }
+
+    /**
+     * Returns true if the product has an active discount (salePrice < price).
+     */
+    hasDiscount(): boolean {
+        return this.salePrice !== null && this.salePrice !== undefined && this.salePrice < this.price
+    }
+
+    /**
+     * Returns the discount percentage if a sale price is set.
+     */
+    getDiscountPercentage(): number {
+        if (!this.hasDiscount() || this.price === 0) return 0
+        return toMoney(((this.price - this.salePrice!) / this.price) * 100)
+    }
+
+    /**
+     * Returns the price the customer actually pays (salePrice if discounted, otherwise price).
+     */
+    getEffectivePrice(): number {
+        return this.hasDiscount() ? toMoney(this.salePrice!) : toMoney(this.price)
+    }
+
+    /**
+     * Returns profit per unit (effectivePrice - costPrice).
+     */
+    getProfit(): number {
+        if (!this.costPrice) return 0
+        return toMoney(this.getEffectivePrice() - this.costPrice)
+    }
 }

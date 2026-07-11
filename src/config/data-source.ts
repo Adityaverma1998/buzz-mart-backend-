@@ -9,6 +9,16 @@ import { AttributeValue } from "../entities/AttributeValue.ts"
 import { Product } from "../entities/Product.ts"
 import { ProductImage } from "../entities/ProductImage.ts"
 import { ProductVariant } from "../entities/ProductVariant.ts"
+import { Address } from "../entities/Address.ts"
+import { Cart } from "../entities/Cart.ts"
+import { CartItem } from "../entities/CartItem.ts"
+import { Order } from "../entities/Order.ts"
+import { OrderItem } from "../entities/OrderItem.ts"
+import { OrderTracking } from "../entities/OrderTracking.ts"
+import { Payment } from "../entities/Payment.ts"
+import { Coupon } from "../entities/Coupon.ts"
+import { CouponUsage } from "../entities/CouponUsage.ts"
+import { AuditLog } from "../entities/AuditLog.ts"
 import { Config } from "./index.ts"
 
 export const AppDataSource = new DataSource({
@@ -31,7 +41,17 @@ export const AppDataSource = new DataSource({
         AttributeValue,
         Product,
         ProductImage,
-        ProductVariant
+        ProductVariant,
+        Address,
+        Cart,
+        CartItem,
+        Order,
+        OrderItem,
+        OrderTracking,
+        Payment,
+        Coupon,
+        CouponUsage,
+        AuditLog
     ],
     migrations: [],
     subscribers: [],
