@@ -1,7 +1,7 @@
 import type { Repository } from "typeorm";
 import { User } from "../entities/User.ts";
 import { UserDevice } from "../entities/UserDevice.ts";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Config } from "../config/index.ts";
 import createHttpError from "http-errors";
@@ -68,7 +68,6 @@ export class UserService {
         if (!user.password) {
             throw new createHttpError.Unauthorized("This account is configured for social login. Please sign in using your OAuth provider.");
         }
-
         // Verify password
         const isPasswordCorrect = await bcrypt.compare(input.password, user.password);
         if (!isPasswordCorrect) {
